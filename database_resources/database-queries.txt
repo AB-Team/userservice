@@ -1,0 +1,7 @@
+create database videoanalytics;
+
+create table user(id integer primary key auto_increment, username varchar(30), email varchar(50)); 
+
+insert into user(username, email) values("vivek", "vivek@user.com"); 
+
+insert into user(username, email) values("amit", "amit@user.com"); 

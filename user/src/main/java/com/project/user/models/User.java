@@ -1,17 +1,16 @@
 package com.project.user.models;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name="user")
 public class User {
 
     @Id
     @GeneratedValue
     private int id;
     private String username;
-    private String userId;
+    private String email;
 
     public int getId() {
         return id;
@@ -29,11 +28,11 @@ public class User {
         this.username = username;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
