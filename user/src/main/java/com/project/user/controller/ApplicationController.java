@@ -3,6 +3,8 @@ package com.project.user.controller;
 import com.project.user.models.User;
 import com.project.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +24,8 @@ public class ApplicationController {
 
     @RequestMapping("/find/users")
     public List<User> getAllUsers(){
-        return userService.findAllUsers();
+        PageRequest pageRequest = PageRequest.of(0, 4, Sort.by("username").ascending());
+        return userService.findAllUsers(pageRequest);
     }
 
     @RequestMapping("/remove/{id}")
