@@ -1,14 +1,18 @@
 package com.project.user.controller;
 
 import com.project.user.models.User;
+import com.project.user.models.UserDP;
+import com.project.user.repositories.UserDPRepository;
+import com.project.user.service.UserDPService;
 import com.project.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -16,6 +20,12 @@ public class ApplicationController {
 
     @Autowired
     UserService userService;
+
+//    @Autowired
+//    UserDPService userDPService;
+
+    @Autowired
+    UserDPRepository userDPRepository;
 
     @RequestMapping("/find/{id}")
     public User getUserById(@PathVariable("id") int id){
@@ -37,5 +47,18 @@ public class ApplicationController {
         }
 
         return true;
+    }
+
+    @PostMapping("/upload/{username}")
+    public String upload(@PathVariable("username") String username, @RequestParam("file") MultipartFile file){
+
+        UserDP userDP = new UserDP();
+        userDP.setUsername(username);
+        userDP.setFileId(username+"1");
+        userDP.setFile(file);
+
+        userDPRepository.insert(userDP);
+
+        return "true";
     }
 }
