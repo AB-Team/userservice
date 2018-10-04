@@ -1,18 +1,23 @@
 package com.project.user.controller;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import com.project.user.models.User;
-import com.project.user.models.UserDP;
-import com.project.user.repositories.UserDPRepository;
-import com.project.user.service.UserDPService;
 import com.project.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -21,11 +26,8 @@ public class ApplicationController {
     @Autowired
     UserService userService;
 
-//    @Autowired
-//    UserDPService userDPService;
-
     @Autowired
-    UserDPRepository userDPRepository;
+    GridFsOperations gridFsOperations;
 
     @RequestMapping("/find/{id}")
     public User getUserById(@PathVariable("id") int id){
@@ -52,13 +54,37 @@ public class ApplicationController {
     @PostMapping("/upload/{username}")
     public String upload(@PathVariable("username") String username, @RequestParam("file") MultipartFile file){
 
-        UserDP userDP = new UserDP();
-        userDP.setUsername(username);
-        userDP.setFileId(username+"1");
-        userDP.setFile(file);
+        DBObject metaData = new BasicDBObject();
+        metaData.put("username", username);
 
-        userDPRepository.insert(userDP);
+        try {
+            String id = gridFsOperations.store(file.getInputStream(), file.getName(), file.getContentType(), metaData).toString();
 
-        return "true";
+            if(id != null && !id.isEmpty()){
+                userService.updateFileId(username, id);
+            }
+
+            return id;
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return "Error";
+    }
+
+    @GetMapping("/download/{fileId}")
+    public ResponseEntity<InputStreamResource> download(@PathVariable("fileId") String fileId){
+
+        GridFSFile gridFSFile = gridFsOperations.findOne(new Query(Criteria.where("_id").is(fileId)));
+
+        GridFsResource resource = gridFsOperations.getResource(gridFSFile.getFilename());
+
+        try{
+            return ResponseEntity.ok().contentType(MediaType.parseMediaType(resource.getContentType())).body(resource);
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return ResponseEntity.noContent().build();
+        }
+
     }
 }

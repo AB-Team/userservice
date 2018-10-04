@@ -22,6 +22,10 @@ public class UserService {
         return userRepository.findAll(pageRequest);
     }
 
+    public int updateFileId(String username, String id){
+        return userRepository.updateFileId(username, id);
+    }
+
     public void deleteUserById(int id){
         userRepository.deleteById(id);
     }
